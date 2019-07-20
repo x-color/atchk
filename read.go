@@ -29,12 +29,16 @@ func readSamplesFromFile(name string, contests Contests) error {
 }
 
 func readSamplesFromWeb(name string, contests Contests) error {
-	data, err := getHTML(makeURL(strings.ToLower(name)))
+	url, err := makeURLForTasks(name)
+	if err != nil {
+		return err
+	}
+	data, err := getHTML(url)
 	if err != nil {
 		return err
 	}
 
-	inputs, outputs := inputFilter(data), outputFilter(data)
+	inputs, outputs := filterForInput(data), filterForOutput(data)
 	if len(inputs) != len(outputs) {
 		return errors.New("read contest from web: not equal number of input and output")
 	}
@@ -67,7 +71,13 @@ func getHTML(url string) (string, error) {
 	return string(body), nil
 }
 
-func filter(data, word string) []string {
+func filterForURL(data, name string) string {
+	raw := strings.Split(data, ">"+strings.ToUpper(name[6:7])+"</a>")[0]
+	list := strings.Split(raw, "href=")
+	return strings.Trim(list[len(list)-1], "'\"")
+}
+
+func filterForIO(data, word string) []string {
 	list := strings.Split(data, "<pre")
 	r := []string{}
 	for i, s := range list {
@@ -80,23 +90,24 @@ func filter(data, word string) []string {
 	return r
 }
 
-func inputFilter(data string) []string {
-	return filter(data, "入力例")
+func filterForInput(data string) []string {
+	return filterForIO(data, "入力例")
 }
 
-func outputFilter(data string) []string {
-	return filter(data, "出力例")
+func filterForOutput(data string) []string {
+	return filterForIO(data, "出力例")
 }
 
-func makeURL(name string) string {
-	url := fmt.Sprintf("https://atcoder.jp/contests/%s/tasks/%s_", name[:6], name[:6])
-	// abc019 ~ abc001 urls are old style. (e.g. abc001a => 'https://.../abc001_1')
-	if name[:3] == "abc" && name[3:6] < "020" {
-		url += fmt.Sprintf("%d", name[6]-byte('a')+1)
-	} else {
-		url += string(name[6])
+func makeURLForContest(name string) string {
+	return fmt.Sprintf("https://atcoder.jp/contests/%s/tasks", name[:6])
+}
+
+func makeURLForTasks(name string) (string, error) {
+	data, err := getHTML(makeURLForContest(name))
+	if err != nil {
+		return "", err
 	}
-	return url
+	return "https://atcoder.jp" + filterForURL(data, name), err
 }
 
 func loadContestsFile(contests Contests) error {
