@@ -94,11 +94,11 @@ func filterForIO(data, word string) []string {
 }
 
 func filterForInput(data string) []string {
-	return filterForIO(data, "入力例")
+	return filterForIO(data, "<h3>入力例")
 }
 
 func filterForOutput(data string) []string {
-	return filterForIO(data, "出力例")
+	return filterForIO(data, "<h3>出力例")
 }
 
 func makeURLForContest(name string) string {
