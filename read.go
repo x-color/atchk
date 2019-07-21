@@ -64,6 +64,9 @@ func getHTML(url string) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return "", errors.New("invalid url: not found " + url)
+	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "", err
