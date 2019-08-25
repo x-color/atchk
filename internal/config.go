@@ -7,10 +7,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
+
+// TODO: Disable to access fields from outer pacakges
 
 type Config struct {
 	Commands Commands `json:"commands"`
@@ -68,6 +71,17 @@ func (conf *Config) Update() error {
 func (conf *Config) Set(key, value string) error {
 	viper.Set(key, value)
 	return viper.Unmarshal(conf)
+}
+
+func (conf *Config) ValidContest(contest string) error {
+	msg := fmt.Errorf("invalid contest name")
+	if len(contest) != 6 || (contest[:3] != "abc" && contest[:3] != "agc") {
+		return msg
+	}
+	if _, err := strconv.Atoi(contest[3:6]); err != nil {
+		return msg
+	}
+	return nil
 }
 
 func (conf *Config) Format() (string, error) {
