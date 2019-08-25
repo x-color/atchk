@@ -20,6 +20,7 @@ func rootCmd() *cobra.Command {
 
 	cmd.AddCommand(newLoginCmd())
 	cmd.AddCommand(newLogoutCmd())
+	cmd.AddCommand(newConfigCmd())
 
 	return cmd
 }

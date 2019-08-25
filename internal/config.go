@@ -1,7 +1,10 @@
 package internal
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -60,4 +63,19 @@ func (conf *Config) Update() error {
 	viper.Set("commands", conf.Commands)
 	viper.Set("system", conf.System)
 	return viper.WriteConfig()
+}
+
+func (conf *Config) Set(key, value string) error {
+	viper.Set(key, value)
+	return viper.Unmarshal(conf)
+}
+
+func (conf *Config) Format() (string, error) {
+	b, err := ioutil.ReadFile(viper.ConfigFileUsed())
+	if err != nil {
+		return "", err
+	}
+	var out bytes.Buffer
+	err = json.Indent(&out, b, "", "\t")
+	return out.String(), err
 }
