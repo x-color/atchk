@@ -4,24 +4,24 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/x-color/atchk/internal/atcoder"
 )
 
 func newEnterCmd() *cobra.Command {
+	at := atcoder.NewAtcoder()
 	cmd := &cobra.Command{
 		Use:     "enter",
 		Short:   "enter the contest",
 		Example: "",
 		Args:    cobra.ExactArgs(1),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return config.Read()
+			return at.LoadConfig()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			contest := strings.ToLower(args[0])
-			if err := config.ValidContest(contest); err != nil {
+			if err := at.SetConfig("system.contest", strings.ToLower(args[0])); err != nil {
 				return err
 			}
-			config.System.Contest = contest
-			return config.Update()
+			return at.SaveConfig()
 		},
 	}
 

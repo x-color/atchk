@@ -1,44 +1,14 @@
 package internal
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
-
-// TODO: Disable to access fields from outer pacakges
-
-type Config struct {
-	Commands Commands `json:"commands"`
-	System   System   `json:"system"`
-}
-
-type Submit struct {
-	TestMode bool `json:"test_mode"`
-}
-
-type Test struct {
-	Cmds     []string `json:"cmds"`
-	Parallel bool     `json:"parallel"`
-}
-
-type Commands struct {
-	Submit Submit `json:"submit"`
-	Test   Test   `json:"test"`
-}
-
-type System struct {
-	Contest    string            `json:"contest"`
-	Cookies    map[string]string `json:"cookies"`
-	Languageid int               `json:"languageid"`
-}
 
 func init() {
 	home, err := homedir.Dir()
@@ -51,11 +21,54 @@ func init() {
 	viper.SetConfigName("config")
 }
 
+type Submit struct {
+	TestMode bool `json:"test_mode"`
+}
+
+func (s *Submit) String() string {
+	return fmt.Sprintf("commands.submit.test_mode = %v", s.TestMode)
+}
+
+type Test struct {
+	Cmds     []string `json:"cmds"`
+	Parallel bool     `json:"parallel"`
+}
+
+func (t *Test) String() string {
+	return fmt.Sprintf("commands.test.cmds = %s\ncommands.test.parallel = %v",
+		strings.Join(t.Cmds, ", "), t.Parallel)
+}
+
+type Commands struct {
+	Submit *Submit `json:"submit"`
+	Test   *Test   `json:"test"`
+}
+
+func (c *Commands) String() string {
+	return fmt.Sprintf("%s\n%s", c.Submit, c.Test)
+}
+
+type System struct {
+	Contest    string            `json:"contest"`
+	Cookies    map[string]string `json:"cookies"`
+	Language   string            `json:"language"`
+	Languageid int               `json:"languageid"`
+}
+
+func (sys *System) String() string {
+	return fmt.Sprintf("system.contest = %s\nsystem.language = %s",
+		sys.Contest, sys.Language)
+}
+
+type Config struct {
+	Commands *Commands `json:"commands"`
+	System   *System   `json:"system"`
+}
+
 func (conf *Config) Read() error {
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// TODO: write error message
-			return fmt.Errorf("%s\n%s", err, "sample message")
+			return fmt.Errorf("%s\n%s", err, "Please execute `atchk init`.")
 		}
 		return err
 	}
@@ -73,23 +86,6 @@ func (conf *Config) Set(key, value string) error {
 	return viper.Unmarshal(conf)
 }
 
-func (conf *Config) ValidContest(contest string) error {
-	msg := fmt.Errorf("invalid contest name")
-	if len(contest) != 6 || (contest[:3] != "abc" && contest[:3] != "agc") {
-		return msg
-	}
-	if _, err := strconv.Atoi(contest[3:6]); err != nil {
-		return msg
-	}
-	return nil
-}
-
-func (conf *Config) Format() (string, error) {
-	b, err := ioutil.ReadFile(viper.ConfigFileUsed())
-	if err != nil {
-		return "", err
-	}
-	var out bytes.Buffer
-	err = json.Indent(&out, b, "", "\t")
-	return out.String(), err
+func (conf *Config) String() string {
+	return fmt.Sprintf("%s\n%s", conf.Commands, conf.System)
 }

@@ -4,10 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/x-color/atchk/internal"
 )
-
-var config internal.Config
 
 func rootCmd() *cobra.Command {
 	cmd := &cobra.Command{

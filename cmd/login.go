@@ -9,17 +9,17 @@ import (
 )
 
 func newLoginCmd() *cobra.Command {
+	at := atcoder.NewAtcoder()
 	cmd := &cobra.Command{
 		Use:     "login",
 		Short:   "login atcoder",
 		Example: "",
 		Args:    cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return config.Read()
+			return at.LoadConfig()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var at atcoder.Atcoder
-			if at.IsLoggedIn(config.System.Cookies) {
+			if at.IsLoggedIn() {
 				return nil
 			}
 
@@ -33,13 +33,11 @@ func newLoginCmd() *cobra.Command {
 				return err
 			}
 
-			cookies, err := at.Login(username, password)
-			if err != nil {
+			if err := at.Login(username, password); err != nil {
 				return err
 			}
-			config.System.Cookies = cookies
 
-			return config.Update()
+			return at.SaveConfig()
 		},
 	}
 
