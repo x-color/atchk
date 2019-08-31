@@ -21,48 +21,22 @@ func init() {
 	viper.SetConfigName("config")
 }
 
-type Submit struct {
-	TestMode bool `json:"test_mode"`
-}
-
-func (s *Submit) String() string {
-	return fmt.Sprintf("commands.submit.test_mode = %v", s.TestMode)
-}
-
-type Test struct {
-	Cmds     []string `json:"cmds"`
-	Parallel bool     `json:"parallel"`
-}
-
-func (t *Test) String() string {
-	return fmt.Sprintf("commands.test.cmds = %s\ncommands.test.parallel = %v",
-		strings.Join(t.Cmds, ", "), t.Parallel)
-}
-
-type Commands struct {
-	Submit *Submit `json:"submit"`
-	Test   *Test   `json:"test"`
-}
-
-func (c *Commands) String() string {
-	return fmt.Sprintf("%s\n%s", c.Submit, c.Test)
-}
-
 type System struct {
-	Contest    string            `json:"contest"`
-	Cookies    map[string]string `json:"cookies"`
-	Language   string            `json:"language"`
-	Languageid int               `json:"languageid"`
+	Contest    string            `mapstructure:"contest"`
+	Cookies    map[string]string `mapstructure:"cookies"`
+	Language   string            `mapstructure:"language"`
+	Languageid int               `mapstructure:"languageid"`
 }
 
 func (sys *System) String() string {
-	return fmt.Sprintf("system.contest = %s\nsystem.language = %s",
+	return fmt.Sprintf("contest = %s\nlanguage = %s",
 		sys.Contest, sys.Language)
 }
 
 type Config struct {
-	Commands *Commands `json:"commands"`
-	System   *System   `json:"system"`
+	Commands []string `mapstructure:"cmds"`
+	System   *System  `mapstructure:"system"`
+	TestMode bool     `mapstructure:"test_mode"`
 }
 
 func (conf *Config) Read() error {
@@ -72,12 +46,19 @@ func (conf *Config) Read() error {
 		}
 		return err
 	}
-	return viper.Unmarshal(conf)
+	if err := viper.Unmarshal(conf); err != nil {
+		return err
+	}
+	if conf.System == nil {
+		conf.System = new(System)
+	}
+	return nil
 }
 
 func (conf *Config) Update() error {
-	viper.Set("commands", conf.Commands)
+	viper.Set("cmds", conf.Commands)
 	viper.Set("system", conf.System)
+	viper.Set("test_mode", conf.TestMode)
 	return viper.WriteConfig()
 }
 
@@ -87,5 +68,6 @@ func (conf *Config) Set(key, value string) error {
 }
 
 func (conf *Config) String() string {
-	return fmt.Sprintf("%s\n%s", conf.Commands, conf.System)
+	return fmt.Sprintf("test_mode = %v\ncmds = [%s]\n%s",
+		conf.TestMode, strings.Join(conf.Commands, ", "), conf.System)
 }
