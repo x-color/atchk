@@ -18,11 +18,6 @@ var (
 	tasksURL  = ""
 )
 
-type atcoder struct {
-	contests Contests
-	config   *internal.Config
-}
-
 type language struct {
 	id   string
 	name string
@@ -31,6 +26,11 @@ type language struct {
 
 func (l *language) String() string {
 	return l.name
+}
+
+type atcoder struct {
+	contests Contests
+	config   *internal.Config
 }
 
 func NewAtcoder() *atcoder {
