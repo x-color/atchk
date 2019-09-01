@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/x-color/atchk/internal"
 	"github.com/x-color/atchk/internal/atcoder"
 )
 
@@ -13,11 +14,16 @@ func newLogoutCmd() *cobra.Command {
 		Example: "",
 		Args:    cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return at.LoadConfig()
+			_, cache, err := internal.NewConfAndCache()
+			if err != nil {
+				return err
+			}
+			at.SetCache(cache)
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			at.Logout()
-			return at.SaveConfig()
+			return at.SaveCache()
 		},
 	}
 

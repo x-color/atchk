@@ -16,7 +16,12 @@ func newLoginCmd() *cobra.Command {
 		Example: "",
 		Args:    cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return at.LoadConfig()
+			_, cache , err := internal.NewConfAndCache()
+			if err != nil {
+				return err
+			}
+			at.SetCache(cache)
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if at.IsLoggedIn() {
@@ -37,7 +42,7 @@ func newLoginCmd() *cobra.Command {
 				return err
 			}
 
-			return at.SaveConfig()
+			return at.SaveCache()
 		},
 	}
 
