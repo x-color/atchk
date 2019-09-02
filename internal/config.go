@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,14 +11,18 @@ import (
 	"github.com/x-color/atchk/internal/atcoder/contest"
 )
 
+var dir, path string
+
 func init() {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	dir = filepath.Join(home, ".atchk")
+	path = filepath.Join(home, ".atchk", "config.json")
 	viper.SetConfigType("json")
-	viper.AddConfigPath(filepath.Join(home, ".atchk"))
+	viper.AddConfigPath(dir)
 	viper.SetConfigName("config")
 }
 
@@ -69,6 +74,23 @@ func (cf *ConfFile) Read() error {
 	}
 	if cf.Conf == nil {
 		cf.Conf = new(Config)
+	}
+	return nil
+}
+
+func CreateNewConfFile() error {
+	if err := os.Mkdir(dir, 0644); err != nil {
+		if !os.IsExist(err) {
+			return err
+		}
+	}
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	b, err := json.MarshalIndent(&ConfFile{Conf: &Config{}}, "", "\t")
+	if _, err := f.Write(b); err != nil {
+		return err
 	}
 	return nil
 }
