@@ -66,7 +66,7 @@ func (at *atcoder) Login(user, password string) error {
 	values.Add("password", password)
 	values.Add("csrf_token", token)
 
-	req, err := at.NewRequest("POST", getLoginURL(), strings.NewReader(values.Encode()))
+	req, err := at.newRequest("POST", getLoginURL(), strings.NewReader(values.Encode()))
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (at *atcoder) Login(user, password string) error {
 }
 
 func (at *atcoder) IsLoggedIn() bool {
-	req, err := at.NewRequest("GET", getSubmitURL("abc001"), nil)
+	req, err := at.newRequest("GET", getSubmitURL("abc001"), nil)
 	if err != nil {
 		return false
 	}
@@ -115,7 +115,7 @@ func (at *atcoder) getSamplesFromCache(contest, task string) contest.Samples {
 }
 
 func (at *atcoder) getSamplesFromWeb(contest, task string) (contest.Samples, error) {
-	req, err := at.NewRequest("GET", getTasksURL(contest), nil)
+	req, err := at.newRequest("GET", getTasksURL(contest), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (at *atcoder) getSamplesFromWeb(contest, task string) (contest.Samples, err
 		return nil, err
 	}
 
-	req, err = at.NewRequest("GET", taskURL, nil)
+	req, err = at.newRequest("GET", taskURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func (at *atcoder) SaveCache() error {
 }
 
 func (at *atcoder) GetLangList() ([]*language, error) {
-	req, err := at.NewRequest("GET", getSubmitURL("abc001"), nil)
+	req, err := at.newRequest("GET", getSubmitURL("abc001"), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func getLangList(res *http.Response) ([]*language, error) {
 	return langs, nil
 }
 
-func (at *atcoder) NewRequest(method, url string, body io.Reader) (*http.Request, error) {
+func (at *atcoder) newRequest(method, url string, body io.Reader) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
