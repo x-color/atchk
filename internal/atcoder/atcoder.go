@@ -4,12 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/x-color/atchk/internal"
 	"github.com/x-color/atchk/internal/atcoder/contest"
 )
@@ -175,8 +179,41 @@ func (at *atcoder) Test(i int, cmdList []string) (string, error) {
 	return at.cache.Samples[i].Test(cmdList)
 }
 
-func (at *atcoder) Submit() bool {
-	return true
+func (at *atcoder) Submit(contest, task, answerFile, langID string) error {
+	submitURL := getSubmitURL(contest)
+	req, err := at.newRequest("GET", submitURL, nil)
+	res, err := at.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	token, err := getCsrfToken(res)
+	if err != nil {
+		return err
+	}
+
+	code, err := readCode(answerFile)
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{}
+	values.Add("data.TaskScreenName", fmt.Sprintf("%s_%s", contest, task))
+	values.Add("data.LanguageId", langID)
+	values.Add("sourceCode", code)
+	values.Add("csrf_token", token)
+
+	req, err = at.newRequest("POST", submitURL, strings.NewReader(values.Encode()))
+	if err != nil {
+		return err
+	}
+
+	res, err = at.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (at *atcoder) SaveCache() error {
@@ -242,6 +279,32 @@ func (at *atcoder) newRequest(method, url string, body io.Reader) (*http.Request
 		})
 	}
 	return req, nil
+}
+
+func readCode(file string) (string, error) {
+	if strings.HasPrefix(file, "~") {
+		home, err := homedir.Dir()
+		if err != nil {
+			return "", err
+		}
+		file = strings.Replace(file, "~", home, 1)
+	}
+
+	path, err := filepath.Abs(file)
+	if err != nil {
+		return "", err
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
 
 func getCsrfToken(res *http.Response) (string, error) {
