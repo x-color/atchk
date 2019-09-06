@@ -27,10 +27,10 @@ func init() {
 }
 
 type Cache struct {
-	Contest string            `mapstructure:"contest"`
-	Cookies map[string]string `mapstructure:"cookies"`
-	Samples contest.Samples   `mapstructure:"samples"`
-	Task    string            `mapstructure:"task"`
+	Contest string            `json:"contest" mapstructure:"contest"`
+	Cookies map[string]string `json:"cookies" mapstructure:"cookies"`
+	Samples contest.Samples   `json:"samples" mapstructure:"samples"`
+	Task    string            `json:"task" mapstructure:"task"`
 }
 
 func (cache *Cache) Update() error {
@@ -44,19 +44,19 @@ func (cache *Cache) Set(key, value string) error {
 }
 
 type Config struct {
-	Command  string `mapstructure:"cmd"`
-	LangID   int    `mapstructure:"lang_id"`
-	TestMode bool   `mapstructure:"test_mode"`
+	Command  string `json:"cmd" mapstructure:"cmd"`
+	LangID   string `json:"lang_id" mapstructure:"lang_id"`
+	TestMode bool   `json:"test_mode" mapstructure:"test_mode"`
 }
 
 func (conf *Config) String() string {
-	return fmt.Sprintf("cmd = \"%s\"\nlang_id = %d\ntest_mode = %v",
+	return fmt.Sprintf("cmd = \"%s\"\nlang_id = %s\ntest_mode = %v",
 		conf.Command, conf.LangID, conf.TestMode)
 }
 
 type ConfFile struct {
-	Cache *Cache  `mapstructure:"cache"`
-	Conf  *Config `mapstructure:"config"`
+	Cache *Cache  `json:"cache" mapstructure:"cache"`
+	Conf  *Config `json:"config" mapstructure:"config"`
 }
 
 func (cf *ConfFile) Read() error {

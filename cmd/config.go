@@ -30,8 +30,8 @@ func newConfigCmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				for i, lang := range langs {
-					cmd.Printf("%2d %s\n", i+1, lang)
+				for _, lang := range langs {
+					cmd.Printf("- %s\n", lang)
 				}
 				return nil
 			} else {

@@ -21,7 +21,7 @@ type language struct {
 }
 
 func (l *language) String() string {
-	return l.name
+	return fmt.Sprintf("%s : %s", l.name, l.id)
 }
 
 type atcoder struct {
