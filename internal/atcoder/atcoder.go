@@ -341,8 +341,8 @@ func getSamples(res *http.Response) (contest.Samples, error) {
 	for i := range inputs {
 		samples = append(samples, &contest.Sample{
 			ID:     i + 1,
-			Input:  strings.TrimSpace(inputs[i]),
-			Output: strings.TrimSpace(outputs[i]),
+			Input:  inputs[i],
+			Output: outputs[i],
 		})
 	}
 

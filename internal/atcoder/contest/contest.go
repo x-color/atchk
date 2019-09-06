@@ -2,6 +2,7 @@ package contest
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 
 	"github.com/logrusorgru/aurora"
@@ -22,6 +23,14 @@ func (sample *Sample) Test(cmdList []string) (string, error) {
 	} else {
 		cmd = exec.Command(cmdList[0], cmdList[1:]...)
 	}
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return "", err
+	}
+	defer stdin.Close()
+	_, err = io.WriteString(stdin, sample.Input)
+
 	output, err := sample.exec(cmd)
 	if err != nil {
 		return "", err
