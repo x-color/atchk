@@ -44,14 +44,13 @@ func (cache *Cache) Set(key, value string) error {
 }
 
 type Config struct {
-	Command  string `json:"cmd" mapstructure:"cmd"`
-	LangID   string `json:"lang_id" mapstructure:"lang_id"`
-	TestMode bool   `json:"test_mode" mapstructure:"test_mode"`
+	Command string `json:"cmd" mapstructure:"cmd"`
+	LangID  string `json:"lang_id" mapstructure:"lang_id"`
 }
 
 func (conf *Config) String() string {
-	return fmt.Sprintf("cmd = \"%s\"\nlang_id = %s\ntest_mode = %v",
-		conf.Command, conf.LangID, conf.TestMode)
+	return fmt.Sprintf("cmd = \"%s\"\nlang_id = %s",
+		conf.Command, conf.LangID)
 }
 
 type ConfFile struct {
