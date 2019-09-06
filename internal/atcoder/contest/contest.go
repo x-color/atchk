@@ -28,8 +28,8 @@ func (sample *Sample) Test(cmdList []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer stdin.Close()
 	_, err = io.WriteString(stdin, sample.Input)
+	stdin.Close()
 
 	output, err := sample.exec(cmd)
 	if err != nil {
